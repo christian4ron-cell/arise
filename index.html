@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arise Clone</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+        }
+        .hud {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .quest-card {
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #bb86fc;
+        }
+        ul {
+            list-style-type: square;
+            padding-left: 20px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-success { background-color: #03dac6; color: #000; }
+        .btn-fail { background-color: #cf6679; color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="hud">
+        <h2 style="margin:0;">🎖️ Level <span id="levelDisplay">{{ data.level }}</span></h2>
+        <p>✨ XP: <span id="xpDisplay">{{ data.xp }}</span> / <span id="xpNextDisplay">{{ data.xp_to_next_level }}</span></p>
+        <p>🔥 Streak: <span id="streakDisplay">{{ data.streak }}</span> Days</p>
+    </div>
+
+    <div class="quest-card">
+        <h3>📜 {{ quest.title }}</h3>
+        <ul>
+            {% for task in quest.tasks %}
+                <li>{{ task }}</li>
+            {% endfor %}
+        </ul>
+        <p style="color: #bb86fc;"><strong>Reward: +{{ quest.xp }} XP</strong></p>
+
+        <div class="btn-group">
+            <button class="btn-success" onclick="logWorkout('success', {{ quest.xp }})">Completed</button>
+            <button class="btn-fail" onclick="logWorkout('fail', 0)">Failed</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function logWorkout(status, xp) {
+        fetch('/complete_quest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: status, xp_reward: xp }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('levelDisplay').innerText = data.level;
+            document.getElementById('xpDisplay').innerText = data.xp;
+            document.getElementById('xpNextDisplay').innerText = data.xp_to_next_level;
+            document.getElementById('streakDisplay').innerText = data.streak;
+            
+            if(status === 'success') {
+                alert("Quest Complete! Aura gained.");
+            } else {
+                alert("Quest Failed. Streak broken.");
+            }
+            
+            window.location.reload();
+        });
+    }
+</script>
+
+</body>
+</html>
